@@ -117,7 +117,7 @@ $ComputerPrefixLabel = New-Object System.Windows.Forms.Label
 $ComputerPrefixLabel.Font = "Arial, 13pt"
 $ComputerPrefixLabel.Location = "25, 13"
 $ComputerPrefixLabel.Size = "800, 30"
-$ComputerPrefixLabel.Text = "Please Enter the Computer Prefix EX: (ABC-*-*) would just need the last digits of the computer"
+$ComputerPrefixLabel.Text = "Please Enter the Computer Prefix EX: (ABC-*-*) would find a computer named ABC-DEF-GH12345"
 
 $ComputerPrefixTextbox = New-Object System.Windows.Forms.TextBox
 $ComputerPrefixTextbox.Font = "Arial, 15pt"
