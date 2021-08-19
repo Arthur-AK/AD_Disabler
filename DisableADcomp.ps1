@@ -131,6 +131,33 @@ $ComputerPrefixButton.Size = "97, 29"
 $ComputerPrefixButton.Location = "671, 58"
 $ComputerPrefixButton.Text = "Confirm"
 
+
+$InitialForm = New-Object System.Windows.Forms.Form
+$InitialForm.MaximizeBox = $false
+$InitialForm.MinimizeBox = $false
+$InitialForm.ShowIcon = $false
+$InitialForm.Size = "800, 150"
+$InitialForm.TopMost = $true
+$InitialForm.Text = "No Initials found for $Username"
+$InitialForm.FormBorderStyle = "FixedDialog"
+
+$InitialLabel = New-Object System.Windows.Forms.Label
+$InitialLabel.Font = "Arial, 13pt"
+$InitialLabel.Location = "25, 13"
+$InitialLabel.Size = "800, 30"
+$InitialLabel.Text = "We could not find initials for $Username`. Please enter your initials (ex: AK)."
+
+$InitialTextbox = New-Object System.Windows.Forms.TextBox
+$InitialTextbox.Font = "Arial, 15pt"
+$InitialTextbox.Location = "27, 56"
+$InitialTextbox.Size = "636, 30"
+
+$InitialButton = New-Object System.Windows.Forms.Button
+$InitialButton.Font = "Arial, 10pt"
+$InitialButton.Size = "97, 29"
+$InitialButton.Location = "671, 58"
+$InitialButton.Text = "Confirm"
+
 #--- Gather Information ---#
 $currentcomp = $env:COMPUTERNAME
 $Username = $env:USERNAME
@@ -207,11 +234,16 @@ function WriteComputerPrefix {
 function removetmp {
     Remove-Item *$comptime.tmp -ErrorAction SilentlyContinue
 }
+function WriteInitials {
+    $Initial = $InitialTextBox.Text
+    $inibox.Text = $Initial
+}
 
 #---Buttons---#
 $disablebutton.Add_Click({ remove })
 $SearchBaseButton.Add_Click({ WriteSearchBase })
 $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
+$InitialButton.Add_Click({ WriteInitials })
 
 if (!(Test-Path -Path ".\search_base.ini")) {
         New-Item -Path ".\search_base.ini" -ItemType File
@@ -223,7 +255,7 @@ if (!(Test-Path -Path ".\search_base.ini")) {
             }
         $SearchBaseButton.Add_Click({ WriteSearchBase })
         [void]$SearchBaseForm.ShowDialog()
-        }
+}
 if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
         New-Item -Path ".\computer_search_prefix.ini" -ItemType File
         
@@ -233,7 +265,15 @@ if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
             }
         $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
         [void]$ComputerPrefixForm.ShowDialog()
+}
+if ($Initial -eq "") {
+        $Add_To_Initials_Form = @($InitialLabel , $InitialTextbox, $InitialButton)
+        ForEach ($item in $Add_To_Initial_Form) {
+            $InitialForm.Controls.Add($item)
         }
+        $InitialButton.Add_Click({ WriteInitials })
+        [void]$InitialForm.ShowDialog()
+}
 
 $prefix = Get-Content .\computer_search_prefix.ini
 $searchbase = Get-Content .\search_base.ini
