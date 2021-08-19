@@ -164,8 +164,8 @@ $Username = $env:USERNAME
 $ADUsername = Get-ADUser $Username
 [string]$FirstName = $ADUsername.GivenName
 [String]$LastName = $ADUsername.Surname
-[String]$Initial = $ADUsername.GivenName.Substring(0,1) + $ADUsername.Surname.Substring(0,1)
-$inibox.Text = $Initial
+[String]$Global:Initial = $ADUsername.GivenName.Substring(0,1) + $ADUsername.Surname.Substring(0,1)
+$inibox.Text = $Global:Initial
 
 #--- Functions ---#
 function remove {
@@ -174,12 +174,12 @@ function remove {
     if (!(Test-Path -Path ".\Listed Devices\$username")) {
         New-Item -Path ".\Listed Devices" -ItemType Directory
         New-Item -Path ".\Listed Devices\$username" -ItemType Directory
-        New-Item -Path ".\Listed Devices\$username\$initial.log" -ItemType File
-        "#START OF LOG#" | Out-File ".\Listed Devices\$Username\$initial.log"
+        New-Item -Path ".\Listed Devices\$username\$Global:Initial.log" -ItemType File
+        "#START OF LOG#" | Out-File ".\Listed Devices\$Username\$Global:Initial.log"
     }
     if ($compbox.Text.Contains("`*")){
         Write-Host "Wildcard Detected!"
-        "$Username attempted to use a wildcard at $runtime" | Out-File ".\Listed Devices\$Username\$initial.log" -Append
+        "$Username attempted to use a wildcard at $runtime" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
         Return
     } else {
         Write-Host "No wildcard detected"
@@ -189,16 +189,21 @@ function remove {
     
     $stringbox = $compbox.Text.Split("`n") | ?{$_.Trim() -ne ""}
     foreach ($compbox in $stringbox) {
-        write-host "$compbox is being edited"
+        "$runtime ----- $compbox was searched for by $username" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
         $compname1 = $(Get-ADComputer -Filter "Name -Like '$prefix$compbox'" -SearchBase "$searchbase" -Properties Name).Name
         # Add line to split entries in the event that there are two names linked to the same asset
         $compname2 = $compname1 -split "\s" | ?{$_.Trim() -ne ""}
-        Write-Host $compname1
-        Write-Host $compname2
         foreach ($compname1 in $compname2) {
             if ($compname1 -ne $null -or '' -or "\s"){
             $msgbox = [System.Windows.Forms.MessageBox]::Show("Would you like to disable $compname1",'---WARNING---','YesNo')
-            switch ($msgbox){ 'Yes' {SelectYes} 'No' {SelectNo}}
+               switch ($msgbox){ 'Yes' {
+                  SelectYes
+                  "$runtime ----- $Username selected yes for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
+               } 'No' {
+                  SelectNo
+                  "$runtime ----- $Username selected no for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
+               }
+            }
             } else {
                 SelectElse #CURRENTLY NOT WORKING. COMPUTERS NOT IN AD ARE IGNORED AT THE MOMENT AND ARE NOT LOGGED
                 Write-Host "Yes"
@@ -215,7 +220,7 @@ function remove {
 function SelectYes {
     "$compname1 Has been actioned on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
     Get-ADComputer -Filter "Name -Like '$prefix$compbox'" -SearchBase "$searchbase" | Disable-ADAccount
-    Set-ADComputer -Identity "$compname1" -Description "$comptime DISABLED (return) - $Initial"
+    Set-ADComputer -Identity "$compname1" -Description "$comptime DISABLED (return) - $Global:Initial"
 }
 function SelectNo {
     "$compname1 was not removed due to user selection" | Out-File ADListnotremoved_$comptime.tmp -Append
@@ -235,8 +240,8 @@ function removetmp {
     Remove-Item *$comptime.tmp -ErrorAction SilentlyContinue
 }
 function WriteInitials {
-    $Initial = $InitialTextBox.Text
-    $inibox.Text = $Initial
+    $Global:Initial = $InitialTextBox.Text
+    $inibox.Text = $Global:Initial
     $InitialForm.Hide()
 }
 
@@ -267,7 +272,7 @@ if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
         $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
         [void]$ComputerPrefixForm.ShowDialog()
 }
-if ($Initial -eq $null) {
+if ($Global:Initial -eq $null) {
         $Add_To_Initials_Form = @($InitialLabel , $InitialTextbox, $InitialButton)
         ForEach ($item in $Add_To_Initials_Form) {
             $InitialForm.Controls.Add($item)
