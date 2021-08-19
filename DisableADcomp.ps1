@@ -34,6 +34,7 @@ function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
     $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
+Test-Admin
 if ((Test-Admin) -eq $false)  {
    exit
 }
