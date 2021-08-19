@@ -145,7 +145,7 @@ $InitialLabel = New-Object System.Windows.Forms.Label
 $InitialLabel.Font = "Arial, 13pt"
 $InitialLabel.Location = "25, 13"
 $InitialLabel.Size = "800, 30"
-$InitialLabel.Text = "We could not find initials for $Username`. Please enter your initials (ex: AK)."
+$InitialLabel.Text = "We could not find initials for your username. Please enter your initials (ex: AK)."
 
 $InitialTextbox = New-Object System.Windows.Forms.TextBox
 $InitialTextbox.Font = "Arial, 15pt"
@@ -237,6 +237,7 @@ function removetmp {
 function WriteInitials {
     $Initial = $InitialTextBox.Text
     $inibox.Text = $Initial
+    $InitialForm.Hide()
 }
 
 #---Buttons---#
@@ -268,7 +269,7 @@ if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
 }
 if ($Initial -eq "") {
         $Add_To_Initials_Form = @($InitialLabel , $InitialTextbox, $InitialButton)
-        ForEach ($item in $Add_To_Initial_Form) {
+        ForEach ($item in $Add_To_Initials_Form) {
             $InitialForm.Controls.Add($item)
         }
         $InitialButton.Add_Click({ WriteInitials })
