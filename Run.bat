@@ -63,6 +63,4 @@
  setlocal & cd /d %~dp0
  if '%1'=='ELEV' (del "%vbsGetPrivileges%" 1>nul 2>nul  &  shift /1)
 
-powershell -Command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser"
-
-powershell -Command ".\DisableADcomp.ps1"
+powershell -Command "set-executionpolicy -Scope Process -ExecutionPolicy Bypass; .\DisableADcomp.ps1"
