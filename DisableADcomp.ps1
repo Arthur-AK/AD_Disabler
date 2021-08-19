@@ -267,7 +267,7 @@ if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
         $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
         [void]$ComputerPrefixForm.ShowDialog()
 }
-if ($Initial -eq "") {
+if ($Initial -eq $null) {
         $Add_To_Initials_Form = @($InitialLabel , $InitialTextbox, $InitialButton)
         ForEach ($item in $Add_To_Initials_Form) {
             $InitialForm.Controls.Add($item)
