@@ -169,7 +169,7 @@ $inibox.Text = $Global:Initial
 
 #--- Functions ---#
 function remove {
-    $runtime = Get-Date -Format "YYYY-MM-dd - hh:mm"
+    $runtime = Get-Date -Format "yyyy-MM-dd - hh:mm"
     #If the user hasn't run the script before make them a new folder with a master log file for later use
     if (!(Test-Path -Path ".\Listed Devices\$username")) {
         New-Item -Path ".\Listed Devices" -ItemType Directory
