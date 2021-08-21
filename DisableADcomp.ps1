@@ -248,8 +248,23 @@ function WriteInitials {
 #---Buttons---#
 $disablebutton.Add_Click({ remove })
 $SearchBaseButton.Add_Click({ WriteSearchBase })
+$SearchBaseTextBox.Add_KeyDown({
+   if ($_.KeyCode -eq "Enter"){
+      WriteSearchBase
+   }
+})
 $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
+$ComputerPrefixTextBox.Add_KeyDown({
+   if ($_.KeyCode -eq "Enter"){
+      WriteComputerPrefix
+   }
+})
 $InitialButton.Add_Click({ WriteInitials })
+$InitialTextBox.Add_KeyDown({
+   if ($_.KeyCode -eq "Enter"){ 
+      WriteInitials 
+   }
+})
 
 if (!(Test-Path -Path ".\search_base.ini")) {
         New-Item -Path ".\search_base.ini" -ItemType File
@@ -259,7 +274,6 @@ if (!(Test-Path -Path ".\search_base.ini")) {
         ForEach ($item in $Add_To_SearchBase_Form) {
             $SearchBaseForm.Controls.Add($item)
             }
-        $SearchBaseButton.Add_Click({ WriteSearchBase })
         [void]$SearchBaseForm.ShowDialog()
 }
 if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
@@ -269,7 +283,6 @@ if (!(Test-Path -Path ".\computer_search_prefix.ini")) {
         ForEach ($item in $Add_To_Prefix_Form) {
             $ComputerPrefixForm.Controls.Add($item)
             }
-        $ComputerPrefixButton.Add_Click({ WriteComputerPrefix })
         [void]$ComputerPrefixForm.ShowDialog()
 }
 if ($Global:Initial -eq $null) {
@@ -277,7 +290,6 @@ if ($Global:Initial -eq $null) {
         ForEach ($item in $Add_To_Initials_Form) {
             $InitialForm.Controls.Add($item)
         }
-        $InitialButton.Add_Click({ WriteInitials })
         [void]$InitialForm.ShowDialog()
 }
 
