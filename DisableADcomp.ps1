@@ -190,6 +190,7 @@ function remove {
     $stringbox = $compbox.Text.Split("`n") | ?{$_.Trim() -ne ""}
     foreach ($compbox in $stringbox) {
         "$runtime ----- $compbox was searched for by $username" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
+        $DisableButton.Text = "Searching $compbox..."
         $compname1 = $(Get-ADComputer -Filter "Name -Like '$prefix$compbox'" -SearchBase "$searchbase" -Properties Name).Name
         # Add line to split entries in the event that there are two names linked to the same asset
         $compname2 = $compname1 -split "\s" | ?{$_.Trim() -ne ""}
@@ -216,6 +217,7 @@ function remove {
     Get-Content ADListnotremoved_$comptime.tmp -Erroraction SilentlyContinue | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append -Erroraction SilentlyContinue
     removetmp
     [System.Windows.Forms.MessageBox]::Show("Finished with list of computers","Notification","OK")
+    $DisableButton.Text = "Disable Computers"
 }
 function SelectYes {
     "$compname1 Has been actioned on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
