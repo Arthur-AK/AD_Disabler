@@ -215,7 +215,7 @@ function remove {
     "---------------------NOT ACTIONED---------------------" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
     Get-Content ADListnotremoved_$comptime.tmp -Erroraction SilentlyContinue | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append -Erroraction SilentlyContinue
     removetmp
-    
+    [System.Windows.Forms.MessageBox]::Show("Finished with list of computers","Notification","OK")
 }
 function SelectYes {
     "$compname1 Has been actioned on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
