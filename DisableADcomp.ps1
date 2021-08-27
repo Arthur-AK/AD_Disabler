@@ -57,25 +57,35 @@ $dateselect.CustomFormat = "yyyy-MM-dd"
 $namelabel = New-Object System.Windows.Forms.label
 $namelabel.Text = "Initials:"
 $namelabel.Width = 60
-$namelabel.Location = New-Object System.Drawing.Point(15,32)
+$namelabel.Location = "15,32"
 $namelabel.Font = "Arial, 10"
+
+$verboselabel = New-Object System.Windows.Forms.Label
+$verboselabel.Text = "Verbose?"
+$verboselabel.Width = 65
+$verboselabel.Location = "110,32"
+$verboselabel.Font = "Arial, 10"
+
+$verbosecheckbox = New-Object System.Windows.Forms.CheckBox
+$verbosecheckbox.Location = "176,29"
+$verbosecheckbox.Checked = $True
 
 $compbox = New-Object System.Windows.Forms.RichTextBox
 $compbox.Width = 150; $compbox.Height = 200
 $compbox.Font = "Arial, 10"
-$compbox.Location = New-Object System.Drawing.Point(25,55)
+$compbox.Location = "25,55"
 
 $inibox = New-Object System.Windows.Forms.TextBox
 $inibox.Width = 40
 $inibox.Font = "Arial, 9"
-$inibox.Location = New-Object System.Drawing.Point(90,30)
+$inibox.Location = "65,30"
 $inibox.ReadOnly = $True
 
 $disablebutton = New-Object System.Windows.Forms.Button
 $disablebutton.Text = "Disable Computers"
 $disablebutton.Width = 150; $disablebutton.Height = 30
 $disablebutton.Font = "Arial, 10"
-$disablebutton.Location = New-Object System.Drawing.Point(25,260)
+$disablebutton.Location = "25,260"
 
 
 $SearchBaseForm = New-Object System.Windows.Forms.Form
@@ -196,15 +206,21 @@ function remove {
         $compname2 = $compname1 -split "\s" | ?{$_.Trim() -ne ""}
         foreach ($compname1 in $compname2) {
             if ($compname1 -ne $null -or '' -or "\s"){
-            $msgbox = [System.Windows.Forms.MessageBox]::Show("Would you like to disable $compname1",'---WARNING---','YesNo')
-               switch ($msgbox){ 'Yes' {
-                  SelectYes
-                  "$runtime ----- $Username selected yes for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
-               } 'No' {
-                  SelectNo
-                  "$runtime ----- $Username selected no for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
-               }
-            }
+                if ($verbosecheckbox.Checked -eq $True){
+                    $msgbox = [System.Windows.Forms.MessageBox]::Show("Would you like to disable $compname1",'---WARNING---','YesNo')
+                    switch ($msgbox){ 'Yes' {
+                        SelectYes
+                        "$runtime ----- $Username selected yes for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
+                    } 'No' {
+                        SelectNo
+                        "$runtime ----- $Username selected no for $compname1" | Out-File ".\Listed Devices\$Username\$Global:Initial.log" -Append
+                    }
+                    }
+                } elseif ($verbosecheckbox -eq $false -and $compname1.Count -eq 1){
+                    SelectYes
+                } elseif ($verbosecheckbox -eq $false -and $compname1.Count -gt 1){
+                    "Found multiple. $compname1. $comptime by $Initial"  | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
+                }
             } else {
                 SelectElse #CURRENTLY NOT WORKING. COMPUTERS NOT IN AD ARE IGNORED AT THE MOMENT AND ARE NOT LOGGED
                 Write-Host "Yes"
@@ -220,7 +236,11 @@ function remove {
     $DisableButton.Text = "Disable Computers"
 }
 function SelectYes {
-    "$compname1 Has been actioned on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
+    if ($verbosecheckbox -eq $True){
+        "$compname1 Has been actioned on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
+    } elseif ($verbosecheckbox -eq $false){
+        "$compname1 was actioned as part of a mass action on $comptime by $Initial" | Out-File -Force "./Listed Devices/$username/ADList_$comptime.txt" -Append
+    }
     Get-ADComputer -Filter "Name -Like '$prefix$compbox'" -SearchBase "$searchbase" | Disable-ADAccount
     Set-ADComputer -Identity "$compname1" -Description "$comptime DISABLED (return) - $Global:Initial"
 }
@@ -267,6 +287,9 @@ $InitialTextBox.Add_KeyDown({
       WriteInitials 
    }
 })
+$verbosecheckbox.Add_Click({
+    [System.Windows.Forms.MessageBox]::Show("Verbose mode is on by default.`r`nWith verbose mode off all the computers that you enter will be disabled without clarification!","Warning!","OK",[System.Windows.Forms.MessageBoxIcon]::Warning)
+})
 
 if (!(Test-Path -Path ".\search_base.ini")) {
         New-Item -Path ".\search_base.ini" -ItemType File
@@ -298,7 +321,7 @@ if ($Global:Initial -eq $null) {
 $prefix = Get-Content .\computer_search_prefix.ini
 $searchbase = Get-Content .\search_base.ini
 
-$Add_To_Form = @($disablebutton , $compbox , $dateselect , $namelabel , $inibox)
+$Add_To_Form = @($disablebutton , $compbox , $dateselect , $namelabel , $verboselabel , $verbosecheckbox , $inibox)
 ForEach ($item in $Add_To_Form) {
     $LocalForm.Controls.Add($item)
 }
